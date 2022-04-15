@@ -7,20 +7,27 @@ let totalImages = 0;
 let photosArray = [];
 
 // Unsplash API
-const count = 30;
+const count = 5;
 const apiKey = '1yCCExQMvRWIC_8np2ciYAWcbmuzTiiZyrbh5tLwkBU';
-const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
+let apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
+let isInitialLoad = true;
+
+function updateAPIURLWithNewCount (newCount) {
+    apiUrl = `https://api.unsplash.com/photos/random?client_id=${apiKey}&count=${newCount}`;
+}
 
 // Check if all images were loaded
-function imageLoaded() {
+function ifImagesWereLoaded() {
     imagesLoaded++;
     if (imagesLoaded === totalImages) {
         ready = true;
         loader.hidden = true;
+        count = 30;
+        apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
     }
 }
 
-// Helper Funciton to Set Attributes on DOM Elements
+// Helper Function to Set Attributes on DOM Elements
 function setAttributes(element, attributes) {
     for (const key in attributes) {
         element.setAttribute(key, attributes[key])
@@ -35,8 +42,7 @@ function displayPhotos() {
     photosArray.forEach((photo) => {
         // Create <a> to link to Unsplash
         const item = document.createElement('a');
-        // item.setAttribute('href', photo.links.html);
-        // item.setAttribute('target', '_blank');
+
         setAttributes(item, {
             href: photo.links.html,
             target:'_blank',
@@ -44,9 +50,7 @@ function displayPhotos() {
 
         // Create <img> for photo
         const img = document.createElement('img');
-        // img.setAttribute('src', photo.urls.regular);
-        // img.setAttribute('alt', photo.alt_description);
-        // img.setAttribute('title', photo.alt_description);
+        
         setAttributes(img, {
             src: photo.urls.regular,
             alt: photo.alt_description,
@@ -54,7 +58,7 @@ function displayPhotos() {
         });
 
         // Event Listener, check when each is finished loading
-        img.addEventListener('load', imageLoaded);
+        img.addEventListener('load', ifImagesWereLoaded);
 
         // Put <img> insinde <a>, then put both inside imageContainer Element
         item.appendChild(img);
@@ -63,11 +67,15 @@ function displayPhotos() {
 }
 
 // Get photos from Unsplash API
-async function getPhotos() {
+async function getPhotosFromAPI() {
     try {
         const response = await fetch(apiUrl);
         photosArray = await response.json();
         displayPhotos();
+        if (isInitialLoad) {
+            updateAPIURLWithNewCount(30);
+            isInitialLoad = false;
+        }
     } catch (error) {
 
     }
@@ -77,9 +85,9 @@ async function getPhotos() {
 window.addEventListener('scroll', () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && ready) {
         ready = false;
-        getPhotos();
+        getPhotosFromAPI();
     }
 });
 
 // On Load
-getPhotos();
+getPhotosFromAPI();
