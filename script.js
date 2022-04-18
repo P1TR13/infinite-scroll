@@ -22,8 +22,6 @@ function ifImagesWereLoaded() {
     if (imagesLoaded === totalImages) {
         ready = true;
         loader.hidden = true;
-        count = 30;
-        apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
     }
 }
 
